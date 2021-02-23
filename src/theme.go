@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 )
 
 type sentiment struct {
@@ -21,6 +23,7 @@ type theme struct {
 }
 
 type topic struct {
+	id           int
 	themes       []theme
 	netSentiment int
 	mentions     int
@@ -44,7 +47,6 @@ func getThemes(filename string) []theme {
 	if e != nil {
 		fmt.Println(e)
 	}
-	fmt.Println(themes)
 
 	return themes
 }
@@ -52,6 +54,7 @@ func getThemes(filename string) []theme {
 // Groups a list of themes by topic, collating statistics about them
 func groupByTopic(tSlice []theme) map[string]topic {
 	topicSlice := map[string]topic{}
+	i := 1
 
 	for _, t := range tSlice {
 		posSentiment, _ := strconv.ParseFloat(strings.TrimSpace(t.Sentiment.Positive), 64)
@@ -73,14 +76,27 @@ func groupByTopic(tSlice []theme) map[string]topic {
 			pMentions := int(posSentiment * float64(t.Mentions))
 			nMentions := int(negSentiment * float64(t.Mentions))
 			topicSlice[t.Topic] = topic{
+				id:           i,
 				themes:       []theme{t},
 				mentions:     t.Mentions,
 				pMentions:    pMentions,
 				nMentions:    nMentions,
 				netSentiment: int(float64(pMentions)/float64(t.Mentions)*100) - int(float64(nMentions)/float64(t.Mentions)*100),
 			}
+			i++
 		}
 	}
 
 	return topicSlice
+}
+
+// This function displays topics to stdout in an organized fashion
+func displayTopics(topics map[string]topic) {
+	w := tabwriter.NewWriter(os.Stdout, 10, 4, 2, ' ', 0)
+	fmt.Fprintln(w, "ID\tTopic\t+Sentiment\t-Sentiment\tNetSentiment\tMentions")
+
+	for topic, contents := range topics {
+		fmt.Fprintf(w, "%d\t%s\t%f\t%f\t%d\t%d\n", contents.id, topic, float64(contents.pMentions)/float64(contents.mentions), float64(contents.nMentions)/float64(contents.mentions), contents.netSentiment, contents.mentions)
+	}
+	w.Flush()
 }

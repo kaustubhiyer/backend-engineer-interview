@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -9,6 +10,7 @@ import (
 // If the function ran without calling an error (might add further tests later)
 // create a temp json with 1-2 themes in it and see if they load
 func TestGetThemes(t *testing.T) {
+	os.Remove("_testthemes")
 
 	fileContents := `[{"theme": "testTheme", "topic": "testTopic", "mentions": 300, "sentiment": {"negative": 0.4, "positive": 0.6}}]`
 	filename := "_testthemes"
@@ -25,6 +27,8 @@ func TestGetThemes(t *testing.T) {
 	} else if themes[0].Theme != "testTheme" {
 		t.Errorf("Json did not load correctly, loaded %v but expected %v", themes, fileContents)
 	}
+
+	os.Remove("_testthemes")
 
 }
 

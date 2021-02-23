@@ -1,11 +1,11 @@
 package main
 
-import "fmt"
+// I should initialize the dataset from here
 
 func main() {
 	themes := getThemes("../data/themes.json")
 
 	topics := groupByTopic(themes)
 
-	fmt.Printf("%+v", topics)
+	displayTopics(topics)
 }
