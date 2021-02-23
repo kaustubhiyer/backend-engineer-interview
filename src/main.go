@@ -1,9 +1,9 @@
 package main
 
-func init() {
-
-}
+import "fmt"
 
 func main() {
+	themes := getThemes("../data/themes.json")
 
+	fmt.Println(themes)
 }
