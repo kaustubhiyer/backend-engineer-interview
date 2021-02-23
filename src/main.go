@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
 // I should initialize the dataset from here
@@ -31,12 +34,66 @@ func main() {
 	topics := groupByTopic(themes)
 	fmt.Println("Welcome to CLI Customer Review Analytics.")
 	fmt.Println()
-	fmt.Println("PULSE")
-	fmt.Println()
 
-	displayTopics(topics)
+	// Keeps track of whether we're in feedback or pulse
+	var feedback bool
+	var id int
+	var err error
 
-	// Present Menu
+	for {
+
+		if feedback {
+			fmt.Println("Feedback not implemented yet. Look forward to it!")
+			feedback = false
+		} else {
+			fmt.Println("PULSE")
+			fmt.Println()
+
+			displayTopics(topics)
+
+			// Present Menu
+			fmt.Println()
+			fmt.Println("Options: ")
+			fmt.Println("Enter the ID of the topic to expand")
+			fmt.Println("Enter the ID followed by F to view feedback analytics")
+			fmt.Println("Enter \"exit\" to quit the program")
+			scanner := bufio.NewScanner(os.Stdin)
+			var line string
+			if scanner.Scan() {
+				line = strings.TrimSpace(scanner.Text())
+			}
+
+			if line == "exit" { // Exit program
+				fmt.Println("Thank you for using CLI Customer Review Analytics.")
+
+				os.Exit(0)
+			} else if line[len(line)-1] == 'F' { // go to feedback for ID
+				line = line[:len(line)-1]
+				id, err = strconv.Atoi(line)
+				if err != nil {
+					fmt.Println("Invalid ID, please try again")
+				} else if id >= len(topics) {
+					fmt.Println("Invalid ID, please try again")
+				} else {
+					feedback = true
+				}
+			} else {
+				id, err = strconv.Atoi(line)
+				if err != nil {
+					fmt.Println("Invalid ID, please try again")
+				} else if id >= len(topics) {
+					fmt.Println("Invalid ID, please try again")
+				} else {
+					for name, topic := range topics {
+						if id == topic.id {
+							selectTopic(topics, name)
+						}
+					}
+				}
+			}
+		}
+	}
+
 }
 
 func usageInstructions() {

@@ -102,13 +102,20 @@ func displayTopics(topics map[string]topic) {
 		fmt.Fprintf(w, "%d\t%s\t%f\t%f\t%d\t%d\n", contents.id, topic, float64(contents.pMentions)/float64(contents.mentions), float64(contents.nMentions)/float64(contents.mentions), contents.netSentiment, contents.mentions)
 		// If this topic is selected, present the themes in it
 		if contents.selected {
-
+			for _, t := range contents.themes {
+				fmt.Fprintf(w, "\t - %s\t%s\t%s\t%s\t%d\n", t.Theme, t.Sentiment.Positive, t.Sentiment.Negative, " ", t.Mentions)
+			}
 		}
 	}
 	w.Flush()
 }
 
 func selectTopic(topics map[string]topic, t string) {
+	// reset everything to deselected
+	for _, top := range topics {
+		top.selected = false
+	}
+	// select topic
 	top := topics[t]
 	top.selected = !top.selected
 	topics[t] = top
