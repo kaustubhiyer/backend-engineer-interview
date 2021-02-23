@@ -5,5 +5,7 @@ import "fmt"
 func main() {
 	themes := getThemes("../data/themes.json")
 
-	fmt.Println(themes)
+	topics := groupByTopic(themes)
+
+	fmt.Printf("%+v", topics)
 }

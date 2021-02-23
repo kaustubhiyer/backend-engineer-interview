@@ -1,14 +1,30 @@
 package main
 
-import "testing"
+import (
+	"io/ioutil"
+	"testing"
+)
 
 // We probably want to test this by checking
 // If the function ran without calling an error (might add further tests later)
+// create a temp json with 1-2 themes in it and see if they load
 func TestGetThemes(t *testing.T) {
-	filename := "../data/themes.json"
+
+	fileContents := `[{"theme": "testTheme", "topic": "testTopic", "mentions": 300, "sentiment": {"negative": 0.4, "positive": 0.6}}]`
+	filename := "_testthemes"
+
+	// write contents to file
+	ioutil.WriteFile(filename, []byte(fileContents), 0666)
 
 	// Checks if code runs without calling its error/breaking
-	getThemes(filename)
+	themes := getThemes(filename)
+
+	// check if themes contains testTheme
+	if len(themes) != 1 {
+		t.Errorf("Did not load themes into slice")
+	} else if themes[0].Theme != "testTheme" {
+		t.Errorf("Json did not load correctly, loaded %v but expected %v", themes, fileContents)
+	}
 
 }
 
@@ -21,8 +37,8 @@ func TestGroupByTopic(t *testing.T) {
 		Topic:    "test",
 		Mentions: 10,
 		Sentiment: sentiment{
-			0.5,
-			0.5,
+			"0.5",
+			"0.5",
 		},
 	}
 	B := theme{
@@ -30,8 +46,8 @@ func TestGroupByTopic(t *testing.T) {
 		Topic:    "test",
 		Mentions: 10,
 		Sentiment: sentiment{
-			0.5,
-			0.5,
+			"0.5",
+			"0.5",
 		},
 	}
 	themes := []theme{A, B}
