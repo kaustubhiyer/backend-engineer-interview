@@ -29,6 +29,7 @@ type topic struct {
 	mentions     int
 	pMentions    int
 	nMentions    int
+	selected     bool // checks if a topic is selected so it can be expanded on, default is false
 }
 
 // Retreives a list of themes from a file
@@ -82,6 +83,7 @@ func groupByTopic(tSlice []theme) map[string]topic {
 				pMentions:    pMentions,
 				nMentions:    nMentions,
 				netSentiment: int(float64(pMentions)/float64(t.Mentions)*100) - int(float64(nMentions)/float64(t.Mentions)*100),
+				selected:     false,
 			}
 			i++
 		}
@@ -94,9 +96,20 @@ func groupByTopic(tSlice []theme) map[string]topic {
 func displayTopics(topics map[string]topic) {
 	w := tabwriter.NewWriter(os.Stdout, 10, 4, 2, ' ', 0)
 	fmt.Fprintln(w, "ID\tTopic\t+Sentiment\t-Sentiment\tNetSentiment\tMentions")
+	fmt.Println()
 
 	for topic, contents := range topics {
 		fmt.Fprintf(w, "%d\t%s\t%f\t%f\t%d\t%d\n", contents.id, topic, float64(contents.pMentions)/float64(contents.mentions), float64(contents.nMentions)/float64(contents.mentions), contents.netSentiment, contents.mentions)
+		// If this topic is selected, present the themes in it
+		if contents.selected {
+
+		}
 	}
 	w.Flush()
+}
+
+func selectTopic(topics map[string]topic, t string) {
+	top := topics[t]
+	top.selected = !top.selected
+	topics[t] = top
 }
