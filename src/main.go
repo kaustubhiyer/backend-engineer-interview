@@ -35,6 +35,9 @@ func main() {
 	reviews := retreiveReviews(feedbackFile)
 	fmt.Println("Welcome to CLI Customer Review Analytics.")
 	fmt.Println()
+	pageSize := 5
+	pageNumber := 1
+	sortType := "date"
 
 	// Keeps track of whether we're in feedback or pulse
 	var feedback bool
@@ -45,15 +48,12 @@ func main() {
 
 		if feedback {
 
-			fmt.Println("Feedback not implemented yet. Look forward to it!")
-
 			// We need the following for the feedback:
 			// 1. Results per page
 			// 2. sort type
 			// 3. topic it's filtered by
 			// 4. (later) themes under the topic
-			pageSize := 5
-			sortType := "date"
+
 			var filterTopic string
 			for name, topic := range topics {
 				if id == topic.id {
@@ -61,18 +61,19 @@ func main() {
 				}
 			}
 
-			reviewList := loadReviews(reviews, pageSize, sortType, filterTopic)
+			totalPages, reviewList := loadReviews(reviews, pageSize, sortType, filterTopic, pageNumber)
 
 			// Section 1
 			fmt.Println("Feedback")
 			fmt.Println()
 
-			displayFeedback(reviewList)
+			displayFeedback(reviewList, pageNumber, totalPages)
 
 			fmt.Println()
 			fmt.Println("Options: ")
 			fmt.Println("Enter sort:<sort-type> where sort-type can be: ")
 			fmt.Println("date(default), highest score, lowest score")
+			fmt.Println("Enter pg:<num> where num is the page you wish to access")
 			fmt.Println("Enter return to return to pulse")
 			fmt.Println("Enter \"exit\" to quit the program")
 			scanner := bufio.NewScanner(os.Stdin)
@@ -85,15 +86,28 @@ func main() {
 				fmt.Println("Thank you for using CLI Customer Review Analytics.")
 
 				os.Exit(0)
-			} else if line[:5] == "sort:" { // sort by line
+			} else if len(line) > 5 && line[:5] == "sort:" { // sort by line
 				line = line[5:]
 				if line != "highest score" && line != "lowest score" {
 					fmt.Println("Invalid sort type, try again")
 				} else {
-					reviewList = loadReviews(reviews, pageSize, line, filterTopic)
+					pageNumber = 1
+					sortType = line
+					_, reviewList = loadReviews(reviews, pageSize, line, filterTopic, pageNumber)
 				}
 			} else if line == "return" {
 				feedback = false
+			} else if len(line) > 3 && line[:3] == "pg:" {
+				line = line[3:]
+				newInt, err := strconv.Atoi(line)
+				if err != nil {
+					fmt.Println("Invalid Input, try again")
+				} else if pageNumber > totalPages {
+					fmt.Println("Invalid Input, try again")
+				} else {
+					pageNumber = newInt
+					_, reviewList = loadReviews(reviews, pageSize, line, filterTopic, pageNumber)
+				}
 			} else {
 				fmt.Println("Invalid Input, try again")
 			}

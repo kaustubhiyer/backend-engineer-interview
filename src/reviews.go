@@ -47,36 +47,31 @@ func dateCompare(date1 string, date2 string) bool {
 	t1, _ := time.Parse("02-01-2006", date1)
 	t2, _ := time.Parse("02-01-2006", date2)
 
-	if t1.After(t2) {
-		return true
-	} else {
-		return false
-	}
-
+	return t1.After(t2)
 }
 
 func sentimentCompare(s1 float64, s2 float64) bool {
 	return s1 > s2
 }
 
-func loadReviews(reviews []review, pageSize int, sortType string, filterTopic string) []review {
+func loadReviews(reviews []review, pageSize int, sortType string, filterTopic string, pageNumber int) (int, []review) {
 	// Need to get the top pagesize reviews ordered in decreasing order of sorttype
 	if sortType == "date" {
 		sort.Slice(reviews, func(i int, j int) bool {
 			return dateCompare(reviews[i].Date, reviews[j].Date)
 		})
-		return reviews[:pageSize]
+		return len(reviews) / pageSize, reviews[pageSize*(pageNumber-1) : pageSize*(pageNumber)]
 
 	} else if sortType == "highest score" {
 		sort.Slice(reviews, func(i int, j int) bool {
 			return sentimentCompare(reviews[i].Score, reviews[j].Score)
 		})
-		return reviews[:pageSize]
+		return len(reviews) / pageSize, reviews[:pageSize]
 	} else {
 		sort.Slice(reviews, func(i int, j int) bool {
 			return !sentimentCompare(reviews[i].Score, reviews[j].Score)
 		})
-		return reviews[:pageSize]
+		return len(reviews) / pageSize, reviews[:pageSize]
 	}
 }
 
@@ -93,7 +88,7 @@ func insertNth(s string, n int) string {
 	return buffer.String()
 }
 
-func displayFeedback(reviewList []review) {
+func displayFeedback(reviewList []review, pageNumber int, totalPages int) {
 	w := tabwriter.NewWriter(os.Stdout, 10, 4, 2, ' ', tabwriter.Debug)
 	fmt.Fprintln(w, "Score\tReview\tThemes\tDate")
 	for _, r := range reviewList {
@@ -111,4 +106,5 @@ func displayFeedback(reviewList []review) {
 		}
 	}
 	w.Flush()
+	fmt.Printf("Page: %d of %d\n", pageNumber, totalPages)
 }
