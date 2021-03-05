@@ -94,16 +94,17 @@ func groupByTopic(tSlice []theme) map[string]topic {
 
 // This function displays topics to stdout in an organized fashion
 func displayTopics(topics map[string]topic) {
-	w := tabwriter.NewWriter(os.Stdout, 10, 4, 2, ' ', 0)
-	fmt.Fprintln(w, "ID\tTopic\t+Sentiment\t-Sentiment\tNetSentiment\tMentions")
-	fmt.Println()
+	w := tabwriter.NewWriter(os.Stdout, 10, 4, 2, ' ', tabwriter.Debug)
+	fmt.Fprintln(w, "\tID\tTopic\t+Sentiment\t-Sentiment\tNetSentiment\tMentions\t")
+	fmt.Fprintln(w, "\t--\t-------------\t----------\t----------\t------------\t--------\t")
 
 	for topic, contents := range topics {
-		fmt.Fprintf(w, "%d\t%s\t%f\t%f\t%d\t%d\n", contents.id, topic, float64(contents.pMentions)/float64(contents.mentions), float64(contents.nMentions)/float64(contents.mentions), contents.netSentiment, contents.mentions)
+		fmt.Fprintf(w, "\t%d\t%s\t%f\t%f\t%d\t%d\t\n", contents.id, topic, float64(contents.pMentions)/float64(contents.mentions), float64(contents.nMentions)/float64(contents.mentions), contents.netSentiment, contents.mentions)
 		// If this topic is selected, present the themes in it
+
 		if contents.selected {
 			for _, t := range contents.themes {
-				fmt.Fprintf(w, "\t - %s\t%s\t%s\t%s\t%d\n", t.Theme, t.Sentiment.Positive, t.Sentiment.Negative, " ", t.Mentions)
+				fmt.Fprintf(w, "\t\t - %s\t%s\t%s\t%s\t%d\t\n", t.Theme, t.Sentiment.Positive, t.Sentiment.Negative, " ", t.Mentions)
 			}
 		}
 	}

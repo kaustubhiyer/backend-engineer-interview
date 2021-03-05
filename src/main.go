@@ -27,11 +27,12 @@ func main() {
 
 	// Create filenames for use
 	themeFile := dirname + "/themes.json"
-	// feedbackFile := dirname + "/f.json"
+	feedbackFile := dirname + "/f.json"
 
 	// Get topics to display
 	themes := getThemes(themeFile)
 	topics := groupByTopic(themes)
+	reviews := retreiveReviews(feedbackFile)
 	fmt.Println("Welcome to CLI Customer Review Analytics.")
 	fmt.Println()
 
@@ -43,8 +44,59 @@ func main() {
 	for {
 
 		if feedback {
+
 			fmt.Println("Feedback not implemented yet. Look forward to it!")
-			feedback = false
+
+			// We need the following for the feedback:
+			// 1. Results per page
+			// 2. sort type
+			// 3. topic it's filtered by
+			// 4. (later) themes under the topic
+			pageSize := 5
+			sortType := "date"
+			var filterTopic string
+			for name, topic := range topics {
+				if id == topic.id {
+					filterTopic = name
+				}
+			}
+
+			reviewList := loadReviews(reviews, pageSize, sortType, filterTopic)
+
+			// Section 1
+			fmt.Println("Feedback")
+			fmt.Println()
+
+			displayFeedback(reviewList)
+
+			fmt.Println()
+			fmt.Println("Options: ")
+			fmt.Println("Enter sort:<sort-type> where sort-type can be: ")
+			fmt.Println("date(default), highest score, lowest score")
+			fmt.Println("Enter return to return to pulse")
+			fmt.Println("Enter \"exit\" to quit the program")
+			scanner := bufio.NewScanner(os.Stdin)
+			var line string
+			if scanner.Scan() {
+				line = strings.TrimSpace(scanner.Text())
+			}
+
+			if line == "exit" { // Exit program
+				fmt.Println("Thank you for using CLI Customer Review Analytics.")
+
+				os.Exit(0)
+			} else if line[:5] == "sort:" { // sort by line
+				line = line[5:]
+				reviewList = loadReviews(reviews, pageSize, line, filterTopic)
+			} else if line == "return" {
+				feedback = false
+			} else {
+				fmt.Println("Invalid Input, try again")
+			}
+			fmt.Println()
+			fmt.Println()
+			fmt.Println()
+
 		} else {
 			fmt.Println("PULSE")
 			fmt.Println()
