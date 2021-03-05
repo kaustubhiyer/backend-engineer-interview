@@ -87,7 +87,11 @@ func main() {
 				os.Exit(0)
 			} else if line[:5] == "sort:" { // sort by line
 				line = line[5:]
-				reviewList = loadReviews(reviews, pageSize, line, filterTopic)
+				if line != "highest score" && line != "lowest score" {
+					fmt.Println("Invalid sort type, try again")
+				} else {
+					reviewList = loadReviews(reviews, pageSize, line, filterTopic)
+				}
 			} else if line == "return" {
 				feedback = false
 			} else {
@@ -121,7 +125,10 @@ func main() {
 				os.Exit(0)
 			} else if line[len(line)-1] == 'F' { // go to feedback for ID
 				line = line[:len(line)-1]
+				fmt.Println(line)
+				fmt.Println(topics)
 				id, err = strconv.Atoi(line)
+				id--
 				if err != nil {
 					fmt.Println("Invalid ID, please try again")
 				} else if id >= len(topics) {
